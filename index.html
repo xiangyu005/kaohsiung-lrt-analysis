@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高雄輕軌過去一年資料分析</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; background: #f4f7fb; color: #243447; }
+    header { background: linear-gradient(135deg, #0f62fe, #4dabf7); color: white; padding: 34px 20px; }
+    header h1 { margin: 0 0 8px; font-size: 32px; }
+    header p { margin: 0; opacity: .95; }
+    .container { width: min(1200px, 92%); margin: 24px auto 40px; }
+    .panel { background: white; border-radius: 18px; box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 22px; margin-bottom: 20px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+    .kpi { background: #f8fbff; border: 1px solid #dcebff; border-radius: 16px; padding: 16px; }
+    .kpi .label { color: #59708a; font-size: 13px; margin-bottom: 8px; }
+    .kpi .value { color: #0f62fe; font-size: 28px; font-weight: 800; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; }
+    .chart-wrap { border: 1px solid #e6edf5; border-radius: 16px; padding: 14px; background: #fcfdff; }
+    .chart-title { font-weight: 800; margin-bottom: 10px; color: #213547; }
+    canvas { width: 100% !important; height: 300px !important; }
+    .note { background: #eef5ff; border-left: 4px solid #0f62fe; padding: 12px 14px; border-radius: 10px; line-height: 1.7; }
+    ul { margin: 8px 0 0 20px; line-height: 1.8; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border: 1px solid #e3ebf3; padding: 10px; text-align: center; }
+    th { background: #0f62fe; color: white; position: sticky; top: 0; }
+    .table-box { max-height: 420px; overflow: auto; border: 1px solid #e5edf5; border-radius: 14px; }
+    .muted { color: #687b8f; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>高雄輕軌過去一年資料分析網站</h1>
+    <p></p>
+  </header>
+
+  <div class="container">
+
+    <section class="panel">
+      <div class="chart-title">研究動機</div>
+      <div style="line-height:1.9; color:#30485f;">
+        高雄輕軌串聯駁二、愛河灣、夢時代等具代表性的城市節點，兼具通勤與休閒旅次功能。
+        本研究希望透過過去一年的運量資料，觀察高雄輕軌在平日、假日、月份與星期別的運量變化，
+        判斷其使用型態是否較偏向休閒與觀光需求，並作為後續探討「輕軌是否主要服務觀光」的基礎。
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="chart-title">研究方法（Data Method）</div>
+      <div style="line-height:1.9; color:#30485f;">
+        本研究以你提供的每日運量、每月運量與車站基本資料為基礎，整理出以下分析流程：
+        <ol style="margin:10px 0 0 22px; line-height:1.9;">
+          <li><strong>資料整理：</strong>將每日資料依日期、月份、平日 / 假日進行清理與分類。</li>
+          <li><strong>描述性統計：</strong>計算平均每日運量、最高與最低單日運量、平日與假日平均值。</li>
+          <li><strong>時間趨勢分析：</strong>觀察過去一年每月平均日運量變化，判斷是否存在淡旺季。</li>
+          <li><strong>星期型態分析：</strong>比較星期一到星期日的平均運量，檢查是否出現週末較高的現象。</li>
+          <li><strong>票種結構分析：</strong>統計驗票機、售票機、人工售票與 QR_CODE 的使用占比。</li>
+          <li><strong>綜合判讀：</strong>若假日與週末運量明顯高於平日，且特定月份出現旺季高峰，則可推測輕軌具一定休閒 / 觀光導向。</li>
+        </ol>
+      </div>
+    </section>
+
+    
+
+    <section class="panel">
+      <div class="kpis">
+        <div class="kpi"><div class="label">分析天數</div><div class="value">365</div></div>
+        <div class="kpi"><div class="label">平均每日運量</div><div class="value">36,771</div></div>
+        <div class="kpi"><div class="label">平日平均運量</div><div class="value">33,824</div></div>
+        <div class="kpi"><div class="label">假日平均運量</div><div class="value">44,069</div></div>
+        <div class="kpi"><div class="label">假日較平日差異</div><div class="value">30.3%</div></div>
+        <div class="kpi"><div class="label">輕軌車站數</div><div class="value">38</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="chart-title">重點發現</div>
+      <ul>
+        <li>過去一年最高單日運量為 <strong>99,005</strong> 人次，發生在 <strong>2026-02-19</strong>。</li>
+        <li>過去一年最低單日運量為 <strong>2,063</strong> 人次，發生在 <strong>2025-08-13</strong>。</li>
+        <li>假日平均運量比平日 <strong>高</strong> <strong>30.3%</strong>，可用來判斷是否偏休閒/觀光導向。</li>
+      </ul>
+    </section>
+
+    <section class="panel grid">
+      <div class="chart-wrap">
+        <div class="chart-title">過去一年每月平均日運量</div>
+        <canvas id="monthAvgChart"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">星期別平均運量</div>
+        <canvas id="weeklyChart"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">票種使用占比</div>
+        <canvas id="fareChart"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">歷年總運量（依月資料彙整）</div>
+        <canvas id="yearlyChart"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">歷史月份季節性（日均運量）</div>
+        <canvas id="histMonthChart"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">研究解讀</div>
+        <div class="muted">
+          你現在這 3 份資料比較適合回答：<br><br>
+          1. 高雄輕軌過去一年整體運量是否穩定？<br>
+          2. 假日是否比平日更高，顯示休閒旅次傾向？<br>
+          3. 哪些月份可能有旺季效果？<br>
+          4. 旅客主要透過哪種購票/驗票方式進站？<br><br>
+          若你要回到原本題目「是否主要服務觀光」，還需要再補：<br>
+          <strong>各車站逐日運量</strong>、<strong>觀光景點位置</strong>、<strong>車站與景點距離</strong>。
+        </div>
+      </div>
+    </section>
+
+
+    <section class="panel">
+      <div class="chart-title">結論：是否偏觀光交通</div>
+      <div style="line-height:1.9; color:#30485f;">
+        依據本研究目前取得的整體系統運量資料，高雄輕軌是否「主要」服務觀光，仍需更細的車站別資料才能完全確認；
+        但從 <strong>平日與假日運量差異</strong>、<strong>星期別平均運量</strong> 與 <strong>月份變化</strong> 來看，
+        已可初步判斷其運量結構是否偏向休閒與觀光旅次。
+        <br><br>
+        若分析結果顯示 <strong>假日平均運量高於平日</strong>、<strong>週末運量相對突出</strong>，
+        則代表高雄輕軌具有一定程度的觀光導向特性，而不只是單純的日常通勤運具。
+        不過，由於目前資料屬於整體日總量，建議後續再加入「各車站逐日運量」與「觀光景點距離」資料，
+        才能更精準驗證輕軌是否主要服務觀光景點。
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="chart-title">車站基本資料</div>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>車站代碼</th>
+              <th>車站中文站名</th>
+              <th>車站英文站名</th>
+              <th>站位地點</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>C1</td><td>籬仔內</td><td>Lizihnei</td><td>凱旋四路、一心路及瑞隆路交會路口南側</td></tr><tr><td>C2</td><td>凱旋瑞田</td><td>Kaisyuan Rueitian</td><td>凱旋四路、瑞田街路口</td></tr><tr><td>C3</td><td>前鎮之星</td><td>Cianjhen Star</td><td>中山三路與凱旋四路路口</td></tr><tr><td>C4</td><td>凱旋中華</td><td>Kaisyuan Jhonghua</td><td>中華五路、凱旋四路路口</td></tr><tr><td>C5</td><td>夢時代</td><td>Dream Mall</td><td>成功二路、時代大道路路口南側</td></tr><tr><td>C6</td><td>經貿園區</td><td>Commerce and Trade Park</td><td>成功二路、正勤路路口南側</td></tr><tr><td>C7</td><td>軟體園區</td><td>Software Technology Park</td><td>成功二路、復興三路路口北側</td></tr><tr><td>C8</td><td>高雄展覽館</td><td>Kaohsiung Exhibition Center</td><td>新光路、成功路路口</td></tr><tr><td>C9</td><td>旅運中心</td><td>Cruise Terminal</td><td>三多五路、苓南路路口</td></tr><tr><td>C10</td><td>光榮碼頭</td><td>Glory Pier</td><td>海邊路、青年二路路口</td></tr><tr><td>C11</td><td>真愛碼頭</td><td>Love Pier</td><td>公園二路路口</td></tr><tr><td>C12</td><td>駁二大義</td><td>Dayi Pier-2</td><td>駁二特區，大義街口</td></tr><tr><td>C13</td><td>駁二蓬萊</td><td>Penglai Pier-2</td><td>駁二特區，七賢三路口</td></tr><tr><td>C14</td><td>哈瑪星</td><td>Hamasen</td><td>鼓山一路與臨海新路路口</td></tr><tr><td>C15</td><td>壽山公園(金馬賓館當代美術館)</td><td>Shoushan Park</td><td>五福四路與新樂街段</td></tr><tr><td>C16</td><td>文武聖殿</td><td>Wenwu Temple</td><td>大公路與鼓山一路口</td></tr><tr><td>C17</td><td>鼓山區公所</td><td>Gushan District Office</td><td>興隆路與河川街103巷</td></tr><tr><td>C18</td><td>鼓山</td><td>Gushan</td><td>鐵路街及鐵路街18巷</td></tr><tr><td>C19</td><td>馬卡道</td><td>Makadao</td><td>馬卡道路與華安街口</td></tr><tr><td>C20</td><td>臺鐵美術館</td><td>TRA Museum of Fine Arts</td><td>馬卡道路與青海路口</td></tr><tr><td>C21A</td><td>內惟藝術中心</td><td>Neiwei Arts Center</td><td>馬卡道路與美術館路口</td></tr><tr><td>C21</td><td>美術館</td><td>Kaohsiung Museum of Fine Arts</td><td>美術館路與美術東二路口</td></tr><tr><td>C22</td><td>聯合醫院</td><td>Kaohsiung Municipal United Hospital</td><td>美術館路與中華一路</td></tr><tr><td>C23</td><td>龍華國小</td><td>Longhua Elementary School</td><td>大順一路與龍勝路口</td></tr><tr><td>C24</td><td>愛河之心</td><td>Heart of Love River</td><td>大順一路與博愛一路口</td></tr><tr><td>C25</td><td>新上國小</td><td>Sinshang Elementary School</td><td>大順一路與自由一路口</td></tr><tr><td>C26</td><td>大順民族</td><td>Dashun Minzu</td><td>大順一路與民族一路口</td></tr><tr><td>C27</td><td>灣仔內(大順鼎山)</td><td>Wanzihnei(Dashun Dingshan)</td><td>大順二路與鼎山街口</td></tr><tr><td>C28</td><td>高雄高工</td><td>Kaohsiung Industrial High School</td><td>大順二路與建工路口</td></tr><tr><td>C29</td><td>樹德家商</td><td>Shu-Te Home-Economics & Commercial High School</td><td>大順二路與建興路口</td></tr><tr><td>C30</td><td>科工館</td><td>Science and Technology Museum</td><td>大順三路與鐵道園區（大順三路309巷）</td></tr><tr><td>C31</td><td>聖功醫院(道明中學)</td><td>St.Joseph Hospital(St. Dominic Catholic High School)</td><td>大順三路與建國一路口</td></tr><tr><td>C32</td><td>凱旋公園</td><td>Kaisyuan Park</td><td>中正一路與河南路口（南凱旋公園內）</td></tr><tr><td>C33</td><td>衛生局</td><td>Department of Health</td><td>凱旋二路與凱旋二路81巷</td></tr><tr><td>C34</td><td>五權國小</td><td>Wucyuan Elementary School</td><td>凱旋二路與三多二路口</td></tr><tr><td>C35</td><td>凱旋武昌</td><td>Kaisyuan Wuchang</td><td>凱旋三路與武昌路口</td></tr><tr><td>C36</td><td>凱旋二聖</td><td>Kaisyuan Ersheng</td><td>凱旋三路與二聖路口</td></tr><tr><td>C37</td><td>輕軌機廠</td><td>LRT Depot</td><td>瑞西街與瑞北路口（輕軌機廠內）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const DATA = {"summary": {"days": 365, "avgDaily": 36771, "weekdayAvg": 33824, "holidayAvg": 44069, "holidayDiffPct": 30.3, "peakDate": "2026-02-19", "peakValue": 99005, "lowDate": "2025-08-13", "lowValue": 2063, "stationCount": 38}, "monthAvg": [{"label": "2025-03", "value": 34696}, {"label": "2025-04", "value": 33495}, {"label": "2025-05", "value": 33635}, {"label": "2025-06", "value": 31326}, {"label": "2025-07", "value": 30856}, {"label": "2025-08", "value": 33608}, {"label": "2025-09", "value": 33519}, {"label": "2025-10", "value": 39843}, {"label": "2025-11", "value": 36455}, {"label": "2025-12", "value": 43026}, {"label": "2026-01", "value": 38810}, {"label": "2026-02", "value": 53178}], "weekly": [{"day": "Fri", "value": 38820}, {"day": "Mon", "value": 31089}, {"day": "Sat", "value": 47535}, {"day": "Sun", "value": 40535}, {"day": "Thu", "value": 34560}, {"day": "Tue", "value": 31977}, {"day": "Wed", "value": 32676}], "fareShare": [{"name": "驗票機", "value": 87.1}, {"name": "售票機", "value": 3.3}, {"name": "人工售票", "value": 1.8}, {"name": "QR_CODE", "value": 7.8}], "yearly": [{"year": 2018, "value": 3366470}, {"year": 2019, "value": 3340496}, {"year": 2020, "value": 2323354}, {"year": 2021, "value": 3253883}, {"year": 2022, "value": 5008200}, {"year": 2023, "value": 7768050}, {"year": 2024, "value": 12581145}, {"year": 2025, "value": 13369388}], "histMonth": [{"month": 1, "value": 20497}, {"month": 2, "value": 24951}, {"month": 3, "value": 14906}, {"month": 4, "value": 15395}, {"month": 5, "value": 13469}, {"month": 6, "value": 13762}, {"month": 7, "value": 15748}, {"month": 8, "value": 17357}, {"month": 9, "value": 15150}, {"month": 10, "value": 18768}, {"month": 11, "value": 17721}, {"month": 12, "value": 22492}], "stations": [{"車站代碼": "C1", "車站中文站名": "籬仔內", "車站英文站名": "Lizihnei", "站位地點": "凱旋四路、一心路及瑞隆路交會路口南側", "備註": ""}, {"車站代碼": "C2", "車站中文站名": "凱旋瑞田", "車站英文站名": "Kaisyuan Rueitian", "站位地點": "凱旋四路、瑞田街路口", "備註": ""}, {"車站代碼": "C3", "車站中文站名": "前鎮之星", "車站英文站名": "Cianjhen Star", "站位地點": "中山三路與凱旋四路路口", "備註": ""}, {"車站代碼": "C4", "車站中文站名": "凱旋中華", "車站英文站名": "Kaisyuan Jhonghua", "站位地點": "中華五路、凱旋四路路口", "備註": ""}, {"車站代碼": "C5", "車站中文站名": "夢時代", "車站英文站名": "Dream Mall", "站位地點": "成功二路、時代大道路路口南側", "備註": ""}, {"車站代碼": "C6", "車站中文站名": "經貿園區", "車站英文站名": "Commerce and Trade Park", "站位地點": "成功二路、正勤路路口南側", "備註": ""}, {"車站代碼": "C7", "車站中文站名": "軟體園區", "車站英文站名": "Software Technology Park", "站位地點": "成功二路、復興三路路口北側", "備註": ""}, {"車站代碼": "C8", "車站中文站名": "高雄展覽館", "車站英文站名": "Kaohsiung Exhibition Center", "站位地點": "新光路、成功路路口", "備註": ""}, {"車站代碼": "C9", "車站中文站名": "旅運中心", "車站英文站名": "Cruise Terminal", "站位地點": "三多五路、苓南路路口", "備註": ""}, {"車站代碼": "C10", "車站中文站名": "光榮碼頭", "車站英文站名": "Glory Pier", "站位地點": "海邊路、青年二路路口", "備註": ""}, {"車站代碼": "C11", "車站中文站名": "真愛碼頭", "車站英文站名": "Love Pier", "站位地點": "公園二路路口", "備註": "有電梯"}, {"車站代碼": "C12", "車站中文站名": "駁二大義", "車站英文站名": "Dayi Pier-2", "站位地點": "駁二特區，大義街口", "備註": ""}, {"車站代碼": "C13", "車站中文站名": "駁二蓬萊", "車站英文站名": "Penglai Pier-2", "站位地點": "駁二特區，七賢三路口", "備註": ""}, {"車站代碼": "C14", "車站中文站名": "哈瑪星", "車站英文站名": "Hamasen", "站位地點": "鼓山一路與臨海新路路口", "備註": ""}, {"車站代碼": "C15", "車站中文站名": "壽山公園(金馬賓館當代美術館)", "車站英文站名": "Shoushan Park", "站位地點": "五福四路與新樂街段", "備註": ""}, {"車站代碼": "C16", "車站中文站名": "文武聖殿", "車站英文站名": "Wenwu Temple", "站位地點": "大公路與鼓山一路口", "備註": ""}, {"車站代碼": "C17", "車站中文站名": "鼓山區公所", "車站英文站名": "Gushan District Office", "站位地點": "興隆路與河川街103巷", "備註": ""}, {"車站代碼": "C18", "車站中文站名": "鼓山", "車站英文站名": "Gushan", "站位地點": "鐵路街及鐵路街18巷", "備註": ""}, {"車站代碼": "C19", "車站中文站名": "馬卡道", "車站英文站名": "Makadao", "站位地點": "馬卡道路與華安街口", "備註": ""}, {"車站代碼": "C20", "車站中文站名": "臺鐵美術館", "車站英文站名": "TRA Museum of Fine Arts", "站位地點": "馬卡道路與青海路口", "備註": ""}, {"車站代碼": "C21A", "車站中文站名": "內惟藝術中心", "車站英文站名": "Neiwei Arts Center", "站位地點": "馬卡道路與美術館路口", "備註": ""}, {"車站代碼": "C21", "車站中文站名": "美術館", "車站英文站名": "Kaohsiung Museum of Fine Arts", "站位地點": "美術館路與美術東二路口", "備註": ""}, {"車站代碼": "C22", "車站中文站名": "聯合醫院", "車站英文站名": "Kaohsiung Municipal United Hospital", "站位地點": "美術館路與中華一路", "備註": ""}, {"車站代碼": "C23", "車站中文站名": "龍華國小", "車站英文站名": "Longhua Elementary School", "站位地點": "大順一路與龍勝路口", "備註": ""}, {"車站代碼": "C24", "車站中文站名": "愛河之心", "車站英文站名": "Heart of Love River", "站位地點": "大順一路與博愛一路口", "備註": ""}, {"車站代碼": "C25", "車站中文站名": "新上國小", "車站英文站名": "Sinshang Elementary School", "站位地點": "大順一路與自由一路口", "備註": ""}, {"車站代碼": "C26", "車站中文站名": "大順民族", "車站英文站名": "Dashun Minzu", "站位地點": "大順一路與民族一路口", "備註": ""}, {"車站代碼": "C27", "車站中文站名": "灣仔內(大順鼎山)", "車站英文站名": "Wanzihnei(Dashun Dingshan)", "站位地點": "大順二路與鼎山街口", "備註": ""}, {"車站代碼": "C28", "車站中文站名": "高雄高工", "車站英文站名": "Kaohsiung Industrial High School", "站位地點": "大順二路與建工路口", "備註": ""}, {"車站代碼": "C29", "車站中文站名": "樹德家商", "車站英文站名": "Shu-Te Home-Economics & Commercial High School", "站位地點": "大順二路與建興路口", "備註": ""}, {"車站代碼": "C30", "車站中文站名": "科工館", "車站英文站名": "Science and Technology Museum", "站位地點": "大順三路與鐵道園區（大順三路309巷）", "備註": ""}, {"車站代碼": "C31", "車站中文站名": "聖功醫院(道明中學)", "車站英文站名": "St.Joseph Hospital(St. Dominic Catholic High School)", "站位地點": "大順三路與建國一路口", "備註": ""}, {"車站代碼": "C32", "車站中文站名": "凱旋公園", "車站英文站名": "Kaisyuan Park", "站位地點": "中正一路與河南路口（南凱旋公園內）", "備註": ""}, {"車站代碼": "C33", "車站中文站名": "衛生局", "車站英文站名": "Department of Health", "站位地點": "凱旋二路與凱旋二路81巷", "備註": ""}, {"車站代碼": "C34", "車站中文站名": "五權國小", "車站英文站名": "Wucyuan Elementary School", "站位地點": "凱旋二路與三多二路口", "備註": ""}, {"車站代碼": "C35", "車站中文站名": "凱旋武昌", "車站英文站名": "Kaisyuan Wuchang", "站位地點": "凱旋三路與武昌路口", "備註": ""}, {"車站代碼": "C36", "車站中文站名": "凱旋二聖", "車站英文站名": "Kaisyuan Ersheng", "站位地點": "凱旋三路與二聖路口", "備註": ""}, {"車站代碼": "C37", "車站中文站名": "輕軌機廠", "車站英文站名": "LRT Depot", "站位地點": "瑞西街與瑞北路口（輕軌機廠內）", "備註": ""}]};
+
+    function makeBar(id, labels, values, label) {
+      new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{ label: label, data: values }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function makeLine(id, labels, values, label) {
+      new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{ label: label, data: values, tension: 0.25, fill: false }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    new Chart(document.getElementById('fareChart'), {
+      type: 'pie',
+      data: {
+        labels: DATA.fareShare.map(d => d.name),
+        datasets: [{ data: DATA.fareShare.map(d => d.value) }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    makeLine('monthAvgChart', DATA.monthAvg.map(d => d.label), DATA.monthAvg.map(d => d.value), '平均日運量');
+    makeBar('weeklyChart', DATA.weekly.map(d => d.day), DATA.weekly.map(d => d.value), '平均日運量');
+    makeBar('yearlyChart', DATA.yearly.map(d => d.year), DATA.yearly.map(d => d.value), '總運量');
+    makeLine('histMonthChart', DATA.histMonth.map(d => d.month), DATA.histMonth.map(d => d.value), '歷史日均運量');
+  </script>
+</body>
+</html>
